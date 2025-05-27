@@ -17,26 +17,31 @@
           CUSTOM_ARGS: "--server.http.listen-addr=0.0.0.0:12345"
         alloy_config: |
           prometheus.exporter.unix "host" {
-            include_exporter_metrics = true 
+            include_exporter_metrics = true
           }
-          prometheus.scrape "default" {
-            targets = array.concat(
-              prometheus.exporter.unix.host.targets,
+
+          prometheus.scrape "host" {
+            targets = prometheus.exporter.unix.host.targets
+            forward_to = [prometheus.remote_write.mimir_host.receiver]
+            scrape_interval = "15s"
+          }
+
+          prometheus.scrape "metamonitoring" {
+            targets = 
               [{
                 // Self-collect metrics
                 job         = "alloy",
                 __address__ = "127.0.0.1:12345",
-              }],
-            )
-            forward_to = [prometheus.remote_write.mimir.receiver]
+              }]
+            forward_to = [prometheus.remote_write.mimir_metamonitoring.receiver]
             scrape_interval = "15s"
           }
 
+          prometheus.remote_write "mimir_host" {}
+
+          prometheus.remote_write "mimir_metamonitoring" {}
           
           logging {
           level = "info"
           }
-
-
-          prometheus.remote_write "mimir" { }
         
