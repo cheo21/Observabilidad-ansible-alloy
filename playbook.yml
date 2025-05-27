@@ -1,0 +1,42 @@
+- hosts: all
+  gather_facts: true
+  become: true
+  vars_files:
+    - vars/all.yml
+  tasks:
+    - name: Add-repository
+      ansible.builtin.include_tasks: tasks/add-repository.yml
+      when: ansible_os_family == "RedHat"
+
+    - name: Install Alloy
+      ansible.builtin.include_role:
+        name: grafana.grafana.alloy
+      vars:
+        alloy_exposed_ports: true
+        alloy_env_file_vars: 
+          CUSTOM_ARGS: "--server.http.listen-addr=0.0.0.0:12345"
+        alloy_config: |
+          prometheus.exporter.unix "host" {
+            include_exporter_metrics = true 
+          }
+          prometheus.scrape "default" {
+            targets = array.concat(
+              prometheus.exporter.unix.host.targets,
+              [{
+                // Self-collect metrics
+                job         = "alloy",
+                __address__ = "127.0.0.1:12345",
+              }],
+            )
+            forward_to = [prometheus.remote_write.mimir.receiver]
+            scrape_interval = "15s"
+          }
+
+          
+          logging {
+          level = "info"
+          }
+
+
+          prometheus.remote_write "mimir" { }
+        

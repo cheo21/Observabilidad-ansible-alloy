@@ -1,0 +1,27 @@
+- name: Import Rocky Linux GPG key
+  become: true
+  ansible.builtin.rpm_key:
+    state: present
+    key: https://dl.rockylinux.org/pub/rocky/RPM-GPG-KEY-Rocky-9
+    fingerprint: 21CB 256A E16F C54C 6E65 2949 702D 426D 350D 275D
+  
+
+- name: Add Rocky BaseOS repository
+  become: true
+  ansible.builtin.yum_repository:
+    name: rocky-baseos
+    description: Rocky Linux 9 - BaseOS
+    baseurl: https://dl.rockylinux.org/pub/rocky/9/BaseOS/x86_64/os/
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://dl.rockylinux.org/pub/rocky/RPM-GPG-KEY-Rocky-9
+
+- name: Add Rocky AppStream repository
+  become: true
+  ansible.builtin.yum_repository:
+    name: rocky-appstream
+    description: Rocky Linux 9 - AppStream
+    baseurl: https://dl.rockylinux.org/pub/rocky/9/AppStream/x86_64/os/
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://dl.rockylinux.org/pub/rocky/RPM-GPG-KEY-Rocky-9
