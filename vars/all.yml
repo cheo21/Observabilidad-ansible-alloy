@@ -1,2 +1,2 @@
-mount_point_a: /var/cheo
 mimir_endpoint: 
+rpm_url: https://gitlab.bancocolumbia.cloud/infraestructura/observability-windows-provisioning/-/package_files/123/download
